@@ -1,8 +1,8 @@
-name: feature-pipeline-30min
+name: feature-pipeline-10min
 
 on:
   schedule:
-    - cron: '*/30 * * * *' # Runs every 30 minutes
+    - cron: '*/10 * * * *' # Runs every 30 minutes
 
   workflow_dispatch:
 
@@ -42,7 +42,7 @@ jobs:
         run: ls -la /home/runner/work/prediction_model/prediction_model/src
 
       - name: Run feature pipeline
-        run: poetry run python src/taxi_demand_predictor/feature_pipeline.py
+        run: poetry run python src/feature_pipeline.py
 
       - name: Make features
         env: 
