@@ -23,13 +23,13 @@ def create_directories():
         logging.info(f'Folder "raw" ensured at "{RAW_DATA_DIR}"')
         
         BRONZE_DATA_DIR.mkdir(parents=True, exist_ok=True)
-        logging.info(f'Folder "processed" ensured at "{BRONZE_DATA_DIR}"')
+        logging.info(f'Folder "bronze" ensured at "{BRONZE_DATA_DIR}"')
         
         SILVER_DATA_DIR.mkdir(parents=True, exist_ok=True)
-        logging.info(f'Folder "transformed" ensured at "{SILVER_DATA_DIR}"')
+        logging.info(f'Folder "silver" ensured at "{SILVER_DATA_DIR}"')
         
         GOLD_DATA_DIR.mkdir(parents=True, exist_ok=True)
-        logging.info(f'Folder "transformed" ensured at "{GOLD_DATA_DIR}"')
+        logging.info(f'Folder "gold" ensured at "{GOLD_DATA_DIR}"')
         
     except Exception as e:
         

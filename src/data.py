@@ -77,7 +77,52 @@ def download_data_files(base_url: str, year: int, months: list = None):
     
     print("All available files have been downloaded.")
     return [str(path.relative_to(RAW_DATA_DIR.parent)) for path in download_paths if path.exists()]
+
+def join_parquet_files(input_folder: Path, output_folder: Path, output_file_name: str):
+    """
+    Joins all parquet files in the specified folder into a single parquet file and removes duplicates.
+    The files are combined in order according to the month (01, 02, ..., 12).
+
+    :param input_folder: The folder containing the parquet files to join.
+    :param output_file_name: The name of the output parquet file.
+    """
+    parquet_files = sorted(input_folder.glob("*.parquet"), key=lambda x: x.stem)
+
+    if not parquet_files:
+        logging.info(f"No parquet files found in {input_folder}")
+        return
+
+    data_frames = []
+    for file in tqdm(parquet_files, desc="Reading parquet files", colour='green'):
+        df = pd.read_parquet(file)
+        data_frames.append(df)
+
+    combined_df = pd.concat(data_frames, ignore_index=True).drop_duplicates()
+
+    output_file = output_folder / output_file_name
+    combined_df.to_parquet(output_file)
+    logging.info(f"Combined parquet file saved to {output_file}")
+
+def save_data(rides: pd.DataFrame, folder: Path, file_name: str) -> None:
+    """
+    Saves the validated data to a parquet file.
+
+    :param rides: The DataFrame containing the validated ride data.
+    :param folder: The folder where the validated data will be saved.
+    :param file_name: The name of the file to save the validated data.
+    """
+    if not folder.exists():
+        folder.mkdir(parents=True, exist_ok=True)  # Create the year directory if it doesn't exist
+        print(f'Folder "{folder}" created')
+    save_path = folder / file_name
     
+    # Save the DataFrame to a parquet file with a progress bar
+    with tqdm(total=len(rides), desc="Saving data", unit="rows", colour='green') as pbar:
+        rides.to_parquet(save_path)
+        pbar.update(len(rides))
+    
+    print(f'Data saved to "{save_path}"')
+
 def validate_and_save_data(file_path: str, year: int, month: int) -> pd.DataFrame:
     """
     Validates and saves the data for a specific year and month.
@@ -113,53 +158,6 @@ def validate_and_save_data(file_path: str, year: int, month: int) -> pd.DataFram
     save_data(rides, BRONZE_DATA_DIR / str(year), validated_file_name)
     
     return rides
-
-def save_data(rides: pd.DataFrame, folder: Path, file_name: str) -> None:
-    """
-    Saves the validated data to a parquet file.
-
-    :param rides: The DataFrame containing the validated ride data.
-    :param folder: The folder where the validated data will be saved.
-    :param file_name: The name of the file to save the validated data.
-    """
-    if not folder.exists():
-        folder.mkdir(parents=True, exist_ok=True)  # Create the year directory if it doesn't exist
-        print(f'Folder "{folder}" created')
-    save_path = folder / file_name
-    
-    # Save the DataFrame to a parquet file with a progress bar
-    with tqdm(total=len(rides), desc="Saving data", unit="rows", colour='green') as pbar:
-        rides.to_parquet(save_path)
-        pbar.update(len(rides))
-    
-    print(f'Data saved to "{save_path}"')
-
-
-def join_parquet_files(input_folder: Path, output_folder: Path, output_file_name: str):
-    """
-    Joins all parquet files in the specified folder into a single parquet file and removes duplicates.
-    The files are combined in order according to the month (01, 02, ..., 12).
-
-    :param input_folder: The folder containing the parquet files to join.
-    :param output_file_name: The name of the output parquet file.
-    """
-    parquet_files = sorted(input_folder.glob("*.parquet"), key=lambda x: x.stem)
-
-    if not parquet_files:
-        logging.info(f"No parquet files found in {input_folder}")
-        return
-
-    data_frames = []
-    for file in tqdm(parquet_files, desc="Reading parquet files", colour='green'):
-        df = pd.read_parquet(file)
-        data_frames.append(df)
-
-    combined_df = pd.concat(data_frames, ignore_index=True).drop_duplicates()
-
-    output_file = output_folder / output_file_name
-    combined_df.to_parquet(output_file)
-    logging.info(f"Combined parquet file saved to {output_file}")
-    
     
 def transform_data(data: pd.DataFrame) -> pd.DataFrame:
     
@@ -167,7 +165,7 @@ def transform_data(data: pd.DataFrame) -> pd.DataFrame:
     data_grouped = (
         data
         .assign(
-            pickup_time=lambda df: df["pickup_time"].dt.floor('h').astype('datetime64[us]')
+            pickup_time=lambda df: df["pickup_datetime"].dt.floor('h').astype('datetime64[us]')
         )
     .groupby(['pickup_time', 'pickup_location_id'])
     .size()
