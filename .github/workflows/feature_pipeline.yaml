@@ -1,8 +1,8 @@
-name: feature-pipeline-10min
+name: feature-pipeline-15min
 
 on:
   schedule:
-    - cron: '*/30 * * * *' # Runs every 30 minutes
+    - cron: '*/15 * * * *' # Runs every 15 minutes
 
   workflow_dispatch:
 
@@ -38,18 +38,15 @@ jobs:
       - name: Install dependencies
         run: poetry install
 
-      - name: Install nbconvert
-        run: poetry add nbconvert
+      - name: List directory contents
+        run: ls -R /home/runner/work/prediction_model/prediction_model/src
 
-      - name: Convert Jupyter Notebook to Python script
-        run: poetry run jupyter nbconvert --to script /Users/borja/Documents/Somniumrema/projects/ml/taxi_demand_predictor/notebooks/industrialization/12_feature_pipeline.ipynb
-
-      - name: Run feature pipeline
-        run: poetry run python /Users/borja/Documents/Somniumrema/projects/ml/taxi_demand_predictor/notebooks/industrialization/12_feature_pipeline.py
+      - name: Run Jupyter Notebook
+        run: |
+          poetry run python -m nbclient --execute --to notebook --inplace /home/runner/work/prediction_model/prediction_model/notebooks/industrialization/12_feature_pipeline.ipynb
 
       - name: Make features
         env: 
           HOPSWORKS_PROJECT_NAME: ${{ secrets.HOPSWORKS_PROJECT_NAME }}
           HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_API_KEY }}
         run: make features
-
