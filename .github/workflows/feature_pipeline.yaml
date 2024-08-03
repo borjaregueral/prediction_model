@@ -62,11 +62,5 @@ jobs:
       env: 
         HOPSWORKS_PROJECT_NAME: ${{ secrets.HOPSWORKS_PROJECT_NAME }}
         HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_API_KEY }}
-        STREAM_DATA_DIR_RAW = ${{ secrets.STREAM_DATA_DIR_RAW }}
-        STREAM_DATA_DIR_BRONZE = ${{ secrets.STREAM_DATA_DIR_BRONZE }}
-        STREAM_DATA_DIR_SILVER = ${{ secrets.STREAM_DATA_DIR_SILVER }}
-        STREAM_DATA_DIR_GOLD = ${{ secrets.STREAM_DATA_DIR_GOLD }}
-        INPUT_RAW_DIR = ${{ secrets.INPUT_RAW_DIR }}
-        INPUT_SILVER_DIR = ${{ secrets.INPUT_SILVER_DIR }}
       run: make features
 
