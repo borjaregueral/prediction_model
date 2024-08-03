@@ -1,0 +1,72 @@
+name: taxi-demand-feature-pipeline-30min
+
+on:
+  schedule:
+    - cron: '*/30 * * * *' # Runs every 30 minutes
+# */30: Every 30 minutes
+# *: Every hour
+# *: Every day of the month
+# *: Every month
+# *: Every day of the week
+
+name: feature-pipeline
+
+on:
+  schedule:
+  - cron: '0 * * * *'
+
+  workflow_dispatch:
+
+env:
+  PYTHON_VERSION: 3.11
+  POETRY_VERSION: 1.8.3
+  POETRY_URL: https://install.python-poetry.org
+
+jobs:
+
+  feature_pipeline:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v3
+
+    # Poetry cache depends on OS, Python version and Poetry version.
+    - name: Cache Poetry cache
+      uses: actions/cache@v3
+
+      with:
+        path: ~/.cache/pypoetry
+        key: poetry-cache-${{ runner.os }}-${{ env.PYTHON_VERSION }}-${{ env.POETRY_VERSION }}
+    
+    # virtualenv cache should depends on OS, Python version and `poetry.lock` (and optionally workflow files).
+    - name: Cache Packages
+      uses: actions/cache@v3
+      with:
+        path: ~/.local
+        key: poetry-${{ runner.os }}-${{ env.PYTHON_VERSION }}-${{ hashFiles('**/poetry.lock') }}-${{ hashFiles('.github/workflows/*.yml') }}
+    
+    - name: Set up Python ${{ env.PYTHON_VERSION }}
+      uses: actions/setup-python@v3
+      with:
+        python-version: ${{ env.PYTHON_VERSION }}
+    
+    - name: Install Poetry
+      run: |
+        curl -sSL ${{ env.POETRY_URL }} | python - --version ${{ env.POETRY_VERSION }}
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+    
+    - name: Install Dependencies
+      run: poetry install
+        
+    - name: Run feature generation script
+      env: 
+        HOPSWORKS_PROJECT_NAME: ${{ secrets.HOPSWORKS_PROJECT_NAME }}
+        HOPSWORKS_API_KEY: ${{ secrets.HOPSWORKS_API_KEY }}
+        STREAM_DATA_DIR_RAW = ${{ secrets.STREAM_DATA_DIR_RAW }}
+        STREAM_DATA_DIR_BRONZE = ${{ secrets.STREAM_DATA_DIR_BRONZE }}
+        STREAM_DATA_DIR_SILVER = ${{ secrets.STREAM_DATA_DIR_SILVER }}
+        STREAM_DATA_DIR_GOLD = ${{ secrets.STREAM_DATA_DIR_GOLD }}
+        INPUT_RAW_DIR = ${{ secrets.INPUT_RAW_DIR }}
+        INPUT_SILVER_DIR = ${{ secrets.INPUT_SILVER_DIR }}
+      run: make features
+
