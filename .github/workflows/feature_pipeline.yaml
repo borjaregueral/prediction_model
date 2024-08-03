@@ -3,11 +3,6 @@ name: feature-pipeline-30min
 on:
   schedule:
     - cron: '*/1 * * * *' # Runs every 30 minutes
-# */30: Every 30 minutes
-# *: Every hour
-# *: Every day of the month
-# *: Every month
-# *: Every day of the week
 
   workflow_dispatch:
 
