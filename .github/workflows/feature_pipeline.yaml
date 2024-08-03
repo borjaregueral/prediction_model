@@ -38,9 +38,6 @@ jobs:
       - name: Install dependencies
         run: poetry install
 
-      - name: Verify directory contents
-        run: ls -la /home/runner/work/prediction_model/prediction_model/src
-
       - name: Run feature pipeline
         run: poetry run python src/feature_pipeline.py
 
