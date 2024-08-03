@@ -1,4 +1,4 @@
-name: taxi-demand-feature-pipeline-30min
+name: feature-pipeline-30min
 
 on:
   schedule:
@@ -8,12 +8,6 @@ on:
 # *: Every day of the month
 # *: Every month
 # *: Every day of the week
-
-name: feature-pipeline
-
-on:
-  schedule:
-  - cron: '0 * * * *'
 
   workflow_dispatch:
 
