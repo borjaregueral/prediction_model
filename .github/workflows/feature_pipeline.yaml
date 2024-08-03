@@ -2,7 +2,7 @@ name: feature-pipeline-10min
 
 on:
   schedule:
-    - cron: '*/10 * * * *' # Runs every 30 minutes
+    - cron: '*/30 * * * *' # Runs every 30 minutes
 
   workflow_dispatch:
 
@@ -38,8 +38,14 @@ jobs:
       - name: Install dependencies
         run: poetry install
 
+      - name: Install nbconvert
+        run: poetry add nbconvert
+
+      - name: Convert Jupyter Notebook to Python script
+        run: poetry run jupyter nbconvert --to script /Users/borja/Documents/Somniumrema/projects/ml/taxi_demand_predictor/notebooks/industrialization/12_feature_pipeline.ipynb
+
       - name: Run feature pipeline
-        run: poetry run python src/feature_pipeline.py
+        run: poetry run python /Users/borja/Documents/Somniumrema/projects/ml/taxi_demand_predictor/notebooks/industrialization/12_feature_pipeline.py
 
       - name: Make features
         env: 
