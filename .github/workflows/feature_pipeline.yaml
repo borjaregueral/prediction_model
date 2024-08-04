@@ -1,4 +1,4 @@
-name: feature-pipeline-15min
+name: feature-pipeline-15-min
 
 on:
   schedule:
@@ -40,13 +40,14 @@ jobs:
 
       - name: Copy files to correct location
         run: |
-          mkdir -p /home/runner/work/prediction_model/src/taxi_demand_predictor
-          cp -r /home/runner/work/prediction_model/src/* /home/runner/work/prediction_model/src/taxi_demand_predictor/
-          cp -r /home/runner/work/prediction_model/notebooks/industrialization/* /home/runner/work/prediction_model/notebooks/industrialization/
+          mkdir -p /home/runner/work/prediction_model/prediction_model/src/taxi_demand_predictor
+          cp -r /home/runner/work/prediction_model/src/* /home/runner/work/prediction_model/prediction_model/src/taxi_demand_predictor/
+          mkdir -p /home/runner/work/prediction_model/prediction_model/notebooks/industrialization
+          cp -r /home/runner/work/prediction_model/notebooks/industrialization/* /home/runner/work/prediction_model/prediction_model/notebooks/industrialization/
 
       - name: Run Jupyter Notebook
         run: |
-          poetry run python -m nbclient --execute --to notebook --inplace /home/runner/work/prediction_model/notebooks/industrialization/12_feature_pipeline.ipynb
+          poetry run python -m nbclient --execute --to notebook --inplace /home/runner/work/prediction_model/prediction_model/notebooks/industrialization/12_feature_pipeline.ipynb
 
       - name: Make features
         env: 
