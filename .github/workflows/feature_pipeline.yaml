@@ -34,16 +34,16 @@ jobs:
 
       - name: Install Poetry
         run: curl -sSL ${{ env.POETRY_URL }} | python3 - --version ${{ env.POETRY_VERSION }}
-
-      - name: Install dependencies
-        run: poetry install
-
+      
       - name: Copy files to correct location
         run: |
           mkdir -p /home/runner/work/prediction_model/prediction_model/src/taxi_demand_predictor
           cp -r /home/runner/work/prediction_model/src/* /home/runner/work/prediction_model/prediction_model/src/taxi_demand_predictor/
           mkdir -p /home/runner/work/prediction_model/prediction_model/notebooks/industrialization
           cp -r /home/runner/work/prediction_model/notebooks/industrialization/* /home/runner/work/prediction_model/prediction_model/notebooks/industrialization/
+
+      - name: Install dependencies
+        run: poetry install
 
       - name: Run Jupyter Notebook
         run: |
