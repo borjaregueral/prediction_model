@@ -1,4 +1,4 @@
-name: feature-pipeline-10min
+name: feature-pipeline-05min
 
 on:
   schedule:
@@ -10,15 +10,12 @@ jobs:
   feature_pipeline:
     runs-on: ubuntu-latest
 
+    container:
+      image: python:3.11.9-slim  # Use a compatible Docker image
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-
-      - name: Set up Python
-        uses: actions/setup-python@v3
-        with:
-          python-version: 3.11.9
-          architecture: 'arm64'  # Specify the architecture explicitly
 
       - name: Install dependencies
         run: |
