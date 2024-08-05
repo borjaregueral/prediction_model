@@ -3,8 +3,8 @@ from datetime import datetime, timedelta
 import logging
 import pandas as pd
 from typing import List
-from data import save_data, transform_data, add_missing_times
-from paths import RAW_DATA_DIR, BRONZE_DATA_DIR, SILVER_DATA_DIR, GOLD_DATA_DIR
+from taxi_demand_predictor.data import save_data, transform_data, add_missing_times
+from taxi_demand_predictor.paths import RAW_DATA_DIR, BRONZE_DATA_DIR, SILVER_DATA_DIR, GOLD_DATA_DIR
 
 def retrieve_data_in_range(start_timestamp: str, end_timestamp: str, base_path: str) -> pd.DataFrame:
     """

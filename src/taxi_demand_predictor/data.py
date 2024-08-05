@@ -5,7 +5,7 @@ from tqdm import tqdm
 import pandas as pd
 import numpy as np
 from typing import List, Tuple
-from paths import RAW_DATA_DIR, BRONZE_DATA_DIR, SILVER_DATA_DIR, GOLD_DATA_DIR, create_directories
+from taxi_demand_predictor.paths import RAW_DATA_DIR, BRONZE_DATA_DIR, SILVER_DATA_DIR, GOLD_DATA_DIR, create_directories
 
 # Ensure directories are created
 create_directories()
