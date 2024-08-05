@@ -29,6 +29,11 @@ jobs:
           poetry install
           pip install nbconvert
 
+      - name: Debug - List files
+        run: |
+          ls -al /Users/borja/Documents/Somniumrema/projects/ml/taxi_demand_predictor/notebooks/industrialization/
+          ls -al /Users/borja/Documents/Somniumrema/projects/ml/taxi_demand_predictor/src/
+
       - name: Run Jupyter Notebook
         run: |
           jupyter nbconvert --to notebook --execute /Users/borja/Documents/Somniumrema/projects/ml/taxi_demand_predictor/notebooks/industrialization/12_feature_pipeline.ipynb
