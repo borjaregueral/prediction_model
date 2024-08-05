@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: python:3.11.9  # Use a compatible Docker image
+      image: python:3.11.9-slim  # Use a compatible Docker image
 
     steps:
       - name: Checkout code
@@ -20,7 +20,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v3
         with:
-          python-version: 3.9
+          python-version: 3.11.9
           architecture: 'arm64'  # Specify the architecture explicitly
 
       - name: Install dependencies
