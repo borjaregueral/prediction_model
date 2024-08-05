@@ -1,4 +1,4 @@
-name: feature-pipeline-05min
+name: feature-pipeline-10min
 
 on:
   schedule:
@@ -16,6 +16,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+
+      - name: Install build tools
+        run: |
+          apt-get update
+          apt-get install -y build-essential
 
       - name: Install dependencies
         run: |
