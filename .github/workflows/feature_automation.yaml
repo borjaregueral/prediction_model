@@ -37,10 +37,8 @@ jobs:
         run: |
           jupyter kernelspec list
 
-      - name: Debug - List files
-        run: |
-          ls -al notebooks/industrialization/
-          ls -al src/
+      - name: Set up PYTHONPATH
+        run: echo "PYTHONPATH=$PYTHONPATH:$(pwd)/src" >> $GITHUB_ENV
 
       - name: Run Jupyter Notebook
         run: |
