@@ -6,7 +6,7 @@ from typing import List
 from taxi_demand_predictor.data import save_data, transform_data, add_missing_times
 from taxi_demand_predictor.paths import RAW_DATA_DIR, BRONZE_DATA_DIR, SILVER_DATA_DIR, GOLD_DATA_DIR
 
-def retrieve_data_in_range(start_timestamp: str, end_timestamp: str, base_path: str) -> pd.DataFrame:
+def retrieve_data_in_range(start_timestamp: datetime, end_timestamp: datetime, base_path: str) -> pd.DataFrame:
     """
     Retrieve and concatenate parquet files within a specified date range.
 
@@ -38,6 +38,17 @@ def _get_file_paths_in_range(start_date: datetime, end_date: datetime, base_path
     Returns:
     list: A list of file paths for the parquet files in the specified range.
     """
+    # Ensure start_date and end_date are datetime objects
+    if isinstance(start_date, str):
+        start_date = datetime.strptime(start_date, '%Y-%m-%d %H:%M:%S')
+    if isinstance(end_date, str):
+        end_date = datetime.strptime(end_date, '%Y-%m-%d %H:%M:%S')
+
+    print(f"Start Date: {start_date}")
+    print(f"End Date: {end_date}")
+    #print(f"Base Path: {base_path}")
+
+
     file_paths = []
     
     for single_date in pd.date_range(start_date, end_date, freq='MS'):
@@ -48,6 +59,8 @@ def _get_file_paths_in_range(start_date: datetime, end_date: datetime, base_path
         
         if os.path.exists(file_path):
             file_paths.append(file_path)
+        else:
+            print(f"File does not exist: {file_path}")
     
     return file_paths
 
