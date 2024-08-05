@@ -27,11 +27,15 @@ jobs:
           python -m pip install --upgrade pip
           pip install poetry
           poetry install
-          pip install nbconvert jupyter
+          pip install nbconvert jupyter ipykernel
 
       - name: Install Jupyter Kernel
         run: |
           python -m ipykernel install --user --name=python3
+
+      - name: List Jupyter Kernels
+        run: |
+          jupyter kernelspec list
 
       - name: Debug - List files
         run: |
