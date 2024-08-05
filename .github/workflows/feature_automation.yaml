@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
 
     container:
-      image: python:3.9-slim  # Use a compatible Docker image
+      image: python:3.11.9  # Use a compatible Docker image
 
     steps:
       - name: Checkout code
