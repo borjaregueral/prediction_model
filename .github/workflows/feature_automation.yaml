@@ -1,8 +1,8 @@
 name: feature-pipeline-10min
 
-on:
-  schedule:
-    - cron: '*/10 * * * *' # Runs every 10 minutes
+# on:
+#   schedule:
+#     - cron: '*/10 * * * *' # Runs every 10 minutes
 
   workflow_dispatch:
 
