@@ -1,8 +1,8 @@
 import pandas as pd
-from paths import *
+from taxi_demand_predictor.paths import *
 from typing import Callable
-from preprocessing import period_avg
-from preprocessing import split_data, period_avg, TemporalFeaturesEngineer, ColumnDropper
+from taxi_demand_predictor.preprocessing import split_data, period_avg, TemporalFeaturesEngineer, ColumnDropper
+import taxi_demand_predictor.config as cfg
 from datetime import datetime
 from sklearn.preprocessing import FunctionTransformer
 from sklearn.pipeline import make_pipeline
@@ -12,14 +12,14 @@ import lightgbm as lgb
 import optuna
 import numpy as np
 
+# Define a wrapper function for period_avg to use with FunctionTransformer
+def period_avg_4_weeks(df):
+    return period_avg(df, cfg.N_FEATURES, 'hours', '4_weeks_avg')
+
 def get_pipeline(**hyperparameters):
     """
     Returns a pipeline object that preprocesses the data and fits a model.
     """
-    
-    # Define a wrapper function for period_avg to use with FunctionTransformer
-    def period_avg_4_weeks(df):
-        return period_avg(df, 672, 'hours', '4_weeks_avg')
 
     # Create a FunctionTransformer
     add_4_weeks_avg = FunctionTransformer(period_avg_4_weeks, validate=False)

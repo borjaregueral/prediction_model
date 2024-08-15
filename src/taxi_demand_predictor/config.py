@@ -17,5 +17,35 @@ load_dotenv(PARENT_DIR / '.env')
 
 HOPSWORKS_API_KEY = os.environ.get('HOPSWORKS_API_KEY')
 
+# number of historical values our model needs to generate predictions
+N_FEATURES = 24 * 28
+
 FEATURE_GROUP_NAME = 'hourly_features_2023_2024'    
 FEATURE_GROUP_VERSION = 1
+FEATURE_VIEW_NAME = 'hourly_features_view_2023_2024' 
+FEATURE_VIEW_VERSION = 1   
+
+FEATURE_VIEW_METADATA = {
+    'name': 'hourly_features_2023_2024',
+    'version': 1,
+    'description': 'Feature group with hourly time-series data of historical taxi rides',
+    'primary_key': ['pickup_location_id', 'pickup_ts'],
+    'event_time': 'pickup_ts',
+    'online_enabled': True,
+}
+
+FEATURE_GROUP_METADATA = {
+    'name': 'hourly_features_2023_2024',
+    'version': 1,
+    'description': 'Feature group with model predictions',
+    'primary_key': ['pickup_location_id', 'pickup_hour'],
+    'event_time': 'pickup_hour',
+    'online_enabled': True,
+}
+
+MODEL_NAME = 'taxi_demand_predictor'
+MODEL_VERSION = 2 
+
+# number of historical values our model needs to generate predictions
+N_FEATURES = 24 * 28
+STEP_SIZE = 23

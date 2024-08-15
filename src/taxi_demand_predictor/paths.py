@@ -10,6 +10,7 @@ RAW_DATA_DIR = DATA_DIR / 'raw'
 BRONZE_DATA_DIR = DATA_DIR / 'bronze'
 SILVER_DATA_DIR = DATA_DIR / 'silver'
 GOLD_DATA_DIR = DATA_DIR / 'gold'
+MODELS_DIR = PARENT_DIR / 'models'
 
 def create_directories():
     """
@@ -30,6 +31,9 @@ def create_directories():
         
         GOLD_DATA_DIR.mkdir(parents=True, exist_ok=True)
         logging.info(f'Folder "gold" ensured at "{GOLD_DATA_DIR}"')
+        
+        MODELS_DIR.mkdir(parents=True, exist_ok=True)
+        logging.info(f'Folder "models" ensured at "{MODELS_DIR}"')
         
     except Exception as e:
         

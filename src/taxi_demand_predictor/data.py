@@ -290,8 +290,9 @@ def process_location(data: pd.DataFrame, start_position: int, n_features: int, s
     return combined_df
 
 def generate_training_set(data: pd.DataFrame, start_position: int, n_features: int, step_size: int, pickup_location_id: int = None, target_col: str = 'ride_count') -> pd.DataFrame:
+    
+    
     data['pickup_time'] = pd.to_datetime(data['pickup_time'])
-
     year = data['pickup_time'].dt.year.iloc[0]
     month = data['pickup_time'].dt.month.iloc[0]
 
@@ -320,7 +321,7 @@ def generate_training_set(data: pd.DataFrame, start_position: int, n_features: i
     final_df['pickup_time'] = final_df['pickup_time'].apply(lambda x: pd.Timestamp(x))
     final_df['pickup_location_id'] = final_df['pickup_location_id'].astype('int32')
 
-    save_data(final_df, Path(GOLD_DATA_DIR)/ str(year), filename)
+    #save_data(final_df, Path(GOLD_DATA_DIR)/ str(year), filename)
     return final_df
 
 def filter_by_location(df: pd.DataFrame, location: str, location_col: str = 'pickup_location_id') -> pd.DataFrame:
