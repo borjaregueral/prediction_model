@@ -24,6 +24,9 @@ optuna = "^3.6.1"
 python-dotenv = "^1.0.1"
 hopsworks = "^3.7.0"
 pyspark = "^3.5.1"
+streamlit = "^1.37.1"
+geopandas = "^1.0.1"
+pydeck = "^0.9.1"
 
 
 [build-system]
