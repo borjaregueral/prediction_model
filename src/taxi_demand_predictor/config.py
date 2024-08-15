@@ -1,6 +1,9 @@
 import os
 from dotenv import load_dotenv
 from taxi_demand_predictor.paths import RAW_DATA_DIR, BRONZE_DATA_DIR, SILVER_DATA_DIR, GOLD_DATA_DIR, PARENT_DIR
+from datetime import datetime, timedelta
+import pandas as pd
+
 STREAM_DATA_DIR_RAW = RAW_DATA_DIR / "2023-2024"
 STREAM_DATA_DIR_BRONZE = BRONZE_DATA_DIR / "2023-2024"
 STREAM_DATA_DIR_SILVER = SILVER_DATA_DIR / "2023-2024"
@@ -49,3 +52,9 @@ MODEL_VERSION = 2
 # number of historical values our model needs to generate predictions
 N_FEATURES = 24 * 28
 STEP_SIZE = 23
+
+CURRENT_DATE = pd.to_datetime(datetime.utcnow()).floor('h')
+END_DATE = CURRENT_DATE - timedelta(days=7*10)
+START_DATE = END_DATE - timedelta(days=7*6)
+
+

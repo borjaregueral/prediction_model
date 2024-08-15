@@ -1,7 +1,6 @@
 [theme]
-base="dark"
-primaryColor="#ffffff"
-backgroundColor="#000000"
-secondaryBackgroundColor="#333333"
-textColor="#ffffff"
-font="sans serif"
+base = "dark"
+primaryColor = "#1E90FF"  # DodgerBlue color
+
+[server]
+maxMessageSize = 1000

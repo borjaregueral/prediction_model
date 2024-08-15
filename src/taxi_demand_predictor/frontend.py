@@ -9,6 +9,7 @@ import pydeck as pdk
 from taxi_demand_predictor.paths import DATA_DIR
 from taxi_demand_predictor.plots import plot_ts, plot_train_and_target
 from taxi_demand_predictor.inference import get_model_predictions, load_batch_of_features_from_store, load_model_from_registry, load_predictions_from_store
+from taxi_demand_predictor.config import CURRENT_DATE
 
 
 @st.cache_resource
@@ -77,9 +78,9 @@ def generate_nyc_map(df):
     geojson = pdk.Layer(
         "GeoJsonLayer",
         df,
-        opacity=0.25,
+        opacity=0.05, # Changed from 0.25
         stroked=False,
-        filled=True,
+        filled=True, # Changed
         extruded=False,
         wireframe=True,
         get_elevation=10,
@@ -89,7 +90,7 @@ def generate_nyc_map(df):
         pickable=True,
     )
 
-    tooltip = {"html": "<b>Zone:</b> [{LocationID}]{zone} <br /> <b>Predicted rides:</b> {predicted_demand}"}
+    tooltip = {"html": "<b>Zone:</b> [{objectid}]{zone} <br /> <b>Predicted rides:</b> {predicted_demand}"}
 
     r = pdk.Deck(
         layers=[geojson],
@@ -117,7 +118,7 @@ with st.spinner('Loading data...'):
         print(f"Failed to load data: {e}")
 
 with st.spinner('Fetching batch of inference data...'):
-    current_date = pd.to_datetime(datetime.utcnow()).floor('h')
+    current_date = CURRENT_DATE
     features = load_batch_of_features_from_store(current_date)
     st.sidebar.write('inference features fetched from the store')
     progress_bar.progress(2/N_STEPS)
@@ -132,20 +133,18 @@ with st.spinner('Loading model from the registry...'):
 
 
 with st.spinner('Computing model predictions...'):
-    to_pickup_hour = current_date - timedelta(days=7*10)
-    from_pickup_hour = to_pickup_hour - timedelta(days=7*52)
     result = get_model_predictions(model, features)
     st.sidebar.write('Model predictions computed')
     progress_bar.progress(4/N_STEPS)
     
 
 with st.spinner(text="Preparing data to plot..."):
-    df = prepare_data(nyc_map, result)
+    df = prepare_data(nyc_map, result) #sample(frac=0.15)
     st.sidebar.write('Data to plot prepared')
-    progress_bar.progress(6 / N_STEPS)
+    progress_bar.progress(5/N_STEPS)
 
 with st.spinner(text="Generating NYC Map..."):
     r = generate_nyc_map(df)
     st.pydeck_chart(r)
     st.sidebar.write('NYC demand map completed')
-    progress_bar.progress(7 / N_STEPS)
+    progress_bar.progress(6/N_STEPS)

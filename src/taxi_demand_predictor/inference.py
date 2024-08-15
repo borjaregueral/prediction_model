@@ -36,7 +36,8 @@ def get_model_predictions(model, features: pd.DataFrame) -> pd.DataFrame:
     results = pd.DataFrame()
     results['pickup_location_id'] = features['pickup_location_id'].values
     results['predicted_demand'] = predictions.round(0)
-    print(results)
+    # print(f'{results.shape = }')
+    # print(f'{results.head()}')
     return results
 
 
@@ -59,9 +60,9 @@ def load_batch_of_features_from_store(current_date: pd.Timestamp ) -> pd.DataFra
     feature_view = get_or_create_feature_view(cfg.FEATURE_VIEW_METADATA)
 
     # fetch data from the feature store
-    fetch_data_to = current_date - timedelta(days=7*10)
-    fetch_data_from = fetch_data_to - timedelta(days=7*52)
-    print(fetch_data_from, fetch_data_to)
+    fetch_data_to = cfg.END_DATE
+    fetch_data_from = cfg.START_DATE
+
     # add plus minus margin to make sure we do not drop any observation
     ts_data = feature_view.get_batch_data(
         start_time=fetch_data_from - timedelta(days=1),
