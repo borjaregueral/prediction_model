@@ -1,6 +1,7 @@
 data/
 .DS_Store
 .env
+.github/workflows/feature_automation.yaml
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
