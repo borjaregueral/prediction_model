@@ -11,6 +11,7 @@ from taxi_demand_predictor.plots import plot_ts, plot_train_and_target
 from taxi_demand_predictor.inference import get_model_predictions, load_batch_of_features_from_store, load_model_from_registry, load_predictions_from_store, get_or_create_feature_view
 from taxi_demand_predictor.config import CURRENT_DATE, N_STEPS, DESTINATIONS_TIMES
 
+# Set page configuration
 st.set_page_config(layout="wide")
 
 @st.cache_resource
@@ -60,7 +61,7 @@ def pseudocolor(val, minval, maxval, startcolor, stopcolor):
 @st.cache_data
 def prepare_data(_nyc_map, result):
     df = pd.merge(_nyc_map, result, right_on='pickup_location_id', left_on='objectid', how='inner')
-    BLACK, GREENISH = (0, 0, 0), ( 51, 203, 0)
+    BLACK, GREENISH = (0, 0, 0), (51, 203, 0)
     df['color_scaling'] = df['predicted_demand']
     max_pred, min_pred = df['color_scaling'].max(), df['color_scaling'].min()
     df['fill_color'] = df['color_scaling'].apply(lambda x: pseudocolor(x, min_pred, max_pred, BLACK, GREENISH))
@@ -109,64 +110,89 @@ st.markdown(f'<h2 style="font-size:24px;">{current_date}</h2>', unsafe_allow_htm
 progress_bar = st.sidebar.header('Progress and features:')
 progress_bar = st.sidebar.progress(0)
 
-with st.spinner('Loading data...'):
-    try:
+try:
+    with st.spinner('Loading data...'):
         nyc_map = load_background_data_file()
         st.sidebar.write('Data loaded successfully')
         progress_bar.progress(1/N_STEPS)
-    except Exception as e:
-        st.sidebar.write(f"Failed to load data: {e}")
-        print(f"Failed to load data: {e}")
+except Exception as e:
+    st.sidebar.write(f"Failed to load data: {e}")
+    st.error(f"Failed to load data: {e}")
+    print(f"Failed to load data: {e}")
 
-with st.spinner('Fetching batch of inference data...'):
-    current_date = CURRENT_DATE
-    features_data = load_batch_of_features_from_store(current_date)
-    features = features_data.drop(columns=['rides_next_hour'])
-    st.sidebar.write('Inference features fetched from the store')
-    progress_bar.progress(2/N_STEPS)
-    print(f"{features}")
-    print(f"{features.shape}")
+try:
+    with st.spinner('Fetching batch of inference data...'):
+        current_date = CURRENT_DATE
+        features_data = load_batch_of_features_from_store(current_date)
+        features = features_data.drop(columns=['rides_next_hour'])
+        st.sidebar.write('Inference features fetched from the store')
+        progress_bar.progress(2/N_STEPS)
+        print(f"{features}")
+        print(f"{features.shape}")
+except Exception as e:
+    st.sidebar.write(f"Failed to fetch inference data: {e}")
+    st.error(f"Failed to fetch inference data: {e}")
+    print(f"Failed to fetch inference data: {e}")
 
+try:
+    with st.spinner('Loading model from the registry...'):
+        model = load_model_from_registry()
+        st.sidebar.write('ML model loaded from the Registry')
+        progress_bar.progress(3/N_STEPS)
+except Exception as e:
+    st.sidebar.write(f"Failed to load model: {e}")
+    st.error(f"Failed to load model: {e}")
+    print(f"Failed to load model: {e}")
 
-with st.spinner('Loading model from the registry...'):
-    model = load_model_from_registry()
-    st.sidebar.write('ML model loaded from the Registry')
-    progress_bar.progress(3/N_STEPS)
+try:
+    with st.spinner('Computing model predictions...'):
+        result = get_model_predictions(model, features)
+        st.sidebar.write('Model predictions computed')
+        progress_bar.progress(4/N_STEPS)
+except Exception as e:
+    st.sidebar.write(f"Failed to compute model predictions: {e}")
+    st.error(f"Failed to compute model predictions: {e}")
+    print(f"Failed to compute model predictions: {e}")
 
+try:
+    with st.spinner(text="Preparing data to plot..."):
+        df = prepare_data(nyc_map, result).sample(frac=0.40)
+        st.sidebar.write('Plotting data prepared')
+        progress_bar.progress(5/N_STEPS)
+except Exception as e:
+    st.sidebar.write(f"Failed to prepare data for plotting: {e}")
+    st.error(f"Failed to prepare data for plotting: {e}")
+    print(f"Failed to prepare data for plotting: {e}")
 
-with st.spinner('Computing model predictions...'):
-    result = get_model_predictions(model, features)
-    st.sidebar.write('Model predictions computed')
-    progress_bar.progress(4/N_STEPS)
-    
+try:
+    with st.spinner(text="Generating NYC Map..."):
+        r = generate_nyc_map(df)
+        st.pydeck_chart(r)
+        st.sidebar.write('NYC demand heatmap completed')
+        progress_bar.progress(6/N_STEPS)
+except Exception as e:
+    st.sidebar.write(f"Failed to generate NYC map: {e}")
+    st.error(f"Failed to generate NYC map: {e}")
+    print(f"Failed to generate NYC map: {e}")
 
-with st.spinner(text="Preparing data to plot..."):
-    df = prepare_data(nyc_map, result).sample(frac=0.40)
-    st.sidebar.write('Plotting data prepared')
-    progress_bar.progress(5/N_STEPS)
-
-with st.spinner(text="Generating NYC Map..."):
-    r = generate_nyc_map(df)
-    st.pydeck_chart(r)
-    st.sidebar.write('NYC demand heatmap completed')
-    progress_bar.progress(6/N_STEPS)
-    
-with st.spinner(text="Plotting time series..."):
-    row_index = np.argsort(result['predicted_demand']).values[::-1]
-    
-    st.markdown(f'<h2 style="font-size:24px;">Top 3 Destination Zones/Times</h2>', unsafe_allow_html=True)
-    cols = st.columns(DESTINATIONS_TIMES)
-    
-    for i in range(DESTINATIONS_TIMES):
-        row_id = row_index[i]
-        fig = plot_train_and_target(features_data,
-                                    sample=row_id,
-                                    target_column='rides_next_hour',  # Ensure this is a string
-                                    predictions=result['predicted_demand']  # Ensure this is a Series or DataFrame
-                                    )
-        cols[i].plotly_chart(fig, theme='streamlit', use_container_width=True, width=1000)     
-    st.sidebar.write('Time series plot completed')
-    progress_bar.progress(7/N_STEPS)
-    
-    
- 
+try:
+    with st.spinner(text="Plotting time series..."):
+        row_index = np.argsort(result['predicted_demand']).values[::-1]
+        
+        st.markdown(f'<h2 style="font-size:24px;">Top 3 Destination Zones/Times</h2>', unsafe_allow_html=True)
+        cols = st.columns(DESTINATIONS_TIMES)
+        
+        for i in range(DESTINATIONS_TIMES):
+            row_id = row_index[i]
+            fig = plot_train_and_target(features_data,
+                                        sample=row_id,
+                                        target_column='rides_next_hour',  # Ensure this is a string
+                                        predictions=result['predicted_demand']  # Ensure this is a Series or DataFrame
+                                        )
+            cols[i].plotly_chart(fig, theme='streamlit', use_container_width=True, width=1000)     
+        st.sidebar.write('Time series plot completed')
+        progress_bar.progress(7/N_STEPS)
+except Exception as e:
+    st.sidebar.write(f"Failed to plot time series: {e}")
+    st.error(f"Failed to plot time series: {e}")
+    print(f"Failed to plot time series: {e}")
