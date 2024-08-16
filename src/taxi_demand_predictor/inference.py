@@ -28,6 +28,7 @@ def get_feature_store():
 
     return get_hopsworks_project().get_feature_store()
 
+    
 def get_model_predictions(model, features: pd.DataFrame) -> pd.DataFrame:
     """"""
     # past_rides_columns = [c for c in features.columns if c.startswith('rides_')]
@@ -36,10 +37,9 @@ def get_model_predictions(model, features: pd.DataFrame) -> pd.DataFrame:
     results = pd.DataFrame()
     results['pickup_location_id'] = features['pickup_location_id'].values
     results['predicted_demand'] = predictions.round(0)
-    # print(f'{results.shape = }')
-    # print(f'{results.head()}')
-    return results
+    # print(f"Predictions: {results.head(20)}")
 
+    return results
 
 def load_batch_of_features_from_store(current_date: pd.Timestamp ) -> pd.DataFrame:
     """Fetches the batch of features used by the ML system at `current_date`.
@@ -57,7 +57,7 @@ def load_batch_of_features_from_store(current_date: pd.Timestamp ) -> pd.DataFra
     """
     n_features = cfg.N_FEATURES
 
-    feature_view = get_or_create_feature_view(cfg.FEATURE_VIEW_METADATA)
+    feature_view = get_or_create_feature_view(cfg.FEATURE_GROUP_METADATA)
 
     # fetch data from the feature store
     fetch_data_to = cfg.END_DATE
@@ -81,7 +81,7 @@ def load_batch_of_features_from_store(current_date: pd.Timestamp ) -> pd.DataFra
                                           n_features=n_features, 
                                           step_size=cfg.STEP_SIZE, 
                                           pickup_location_id = None, 
-                                          target_col = 'ride_count').drop(columns=['rides_next_hour'])
+                                          target_col = 'ride_count')
     
     return features
     
@@ -148,6 +148,14 @@ def load_predictions_from_store(from_pickup_hour: datetime,to_pickup_hour: datet
 
     return predictions
 
+def clean_feature_view(feature_store, name, version):
+    try:
+        feature_view = feature_store.get_feature_view(name, version)
+        feature_view.clean()
+        logger.info(f"Cleaned up feature view: {name}, version: {version}")
+    except ValueError as e:
+        logger.info(f"Feature view {name}, version: {version} does not exist or is already cleaned up.")
+
 def get_or_create_feature_view(feature_view_metadata):
     """"""
 
@@ -155,11 +163,14 @@ def get_or_create_feature_view(feature_view_metadata):
     feature_store = get_feature_store()
 
     # get pointer to the feature group
-    # from src.config import FEATURE_GROUP_METADATA
-    feature_group = feature_store.get_feature_group(
-        name=feature_view_metadata['name'],
-        version=feature_view_metadata['version']
-    )
+    try:
+        feature_group = feature_store.get_feature_group(
+            name=feature_view_metadata['name'],
+            version=feature_view_metadata['version']
+        )
+    except Exception as e:
+        logger.error(f"Feature group not found: {e}")
+        return None
 
     # create feature view if it doesn't exist
     try:
@@ -172,10 +183,20 @@ def get_or_create_feature_view(feature_view_metadata):
         logger.info("Feature view already exists, skipping creation.")
     
     # get feature view
-    feature_store = get_feature_store()
-    feature_view = feature_store.get_feature_view(
-        name=feature_view_metadata['name'],
-        version=feature_view_metadata['version'],
-    )
+    try:
+        feature_view = feature_store.get_feature_view(
+            name=feature_view_metadata['name'],
+            version=feature_view_metadata['version'],
+        )
+    except ValueError:
+        # Clean up the invalid feature view
+        clean_feature_view(feature_store, feature_view_metadata['name'], feature_view_metadata['version'])
+        
+        # Recreate the feature view
+        feature_view = feature_store.create_feature_view(
+            name=feature_view_metadata['name'],
+            version=feature_view_metadata['version'],
+            query=feature_group.select_all()
+        )
 
     return feature_view

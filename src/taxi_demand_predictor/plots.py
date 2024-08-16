@@ -30,7 +30,7 @@ def plot_ts(df: pd.DataFrame, location: str = None, time_col: str = 'pickup_time
 
 
 
-def plot_train_and_target(data_path: str,
+def plot_train_and_target(df: pd.DataFrame,
                           sample: int, 
                           target_column: str,
                           predictions: Optional[pd.DataFrame] = None,
@@ -45,7 +45,8 @@ def plot_train_and_target(data_path: str,
     :param location: Optional location ID to filter the data.
     """
     # Load the data
-    df = pd.read_parquet(data_path)
+    #df = pd.read_parquet(data_path)
+    # From df
 
     # Ensure the 'pickup_time' and target column exist
     if 'pickup_time' not in df.columns:
@@ -89,7 +90,7 @@ def plot_train_and_target(data_path: str,
         labels={'x': 'Timestamp', 'y': 'Rides Count'}
     )
 
-    # Plot the target data
+    # # Plot the target data
     target_value = row[target_column]
     target_date = row['pickup_time']
     fig.add_scatter(x=[target_date], y=[target_value],
@@ -99,10 +100,22 @@ def plot_train_and_target(data_path: str,
 
     # Plot the predictions if provided
     if predictions is not None:
-        prediction_value = predictions.iloc[sample].values[0]
-        fig.add_scatter(x=[target_date], y=[prediction_value],
+        prediction_value = predictions.iloc[sample] if isinstance(predictions, pd.Series) else predictions.iloc[sample, 0]
+        fig.add_scatter(x=[target_date],
+                        y=[prediction_value],
                         line_color='blue',
                         mode='markers', marker_symbol='circle', marker_size=10,
                         name='Prediction')
 
-    fig.show()
+    #fig.show() # Commented for Streamlit although in the jupyter notebook should be included
+    # Update the layout with a smaller font for the title
+    fig.update_layout(
+        title={
+            'text': title,
+            'font': {
+                'size': 12  # Set the font size here
+            }
+        }
+    )
+    
+    return fig

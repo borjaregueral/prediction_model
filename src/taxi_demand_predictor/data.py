@@ -174,6 +174,43 @@ def transform_data(data: pd.DataFrame) -> pd.DataFrame:
     
     return data_grouped
 
+# def add_missing_times(data: pd.DataFrame, freq: str) -> pd.DataFrame:
+#     """
+#     Adds missing times to the data based on the specified frequency.
+
+#     :param data: The DataFrame containing the data.
+#     :param freq: The frequency for adding missing times.
+#     :return: The DataFrame with missing times added.
+#     """
+#     # Determine the start and end times
+#     min_time = data['pickup_time'].min()
+#     max_time = data['pickup_time'].max()
+    
+#     # Determine the start time as the first day of the month at 00:00:00
+#     start_time = pd.Timestamp(min_time.year, min_time.month, 1).replace(hour=0, minute=0, second=0, microsecond=0)
+    
+#     # Determine the end time as the last data point in the original dataset
+#     end_time = pd.Timestamp(max_time.year, max_time.month, 1).replace(hour=0, minute=0, second=0, microsecond=0)
+#     # Determine the end time as the first day of the following month at 00:00:00
+#     #end_time = (pd.Timestamp(max_time.year, max_time.month, 1) + pd.DateOffset(months=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+    
+#     all_intervals = pd.date_range(start=start_time, end=end_time, freq=freq, inclusive='left')
+    
+#     # Generate all possible locations
+#     all_locations = data['pickup_location_id'].unique()
+    
+#     # Create a DataFrame with all combinations of intervals and locations
+#     all_combinations = pd.MultiIndex.from_product([all_intervals, all_locations], names=['pickup_time', 'pickup_location_id'])
+#     all_combinations_df = pd.DataFrame(index=all_combinations).reset_index()
+    
+#     # Merge with the original data to fill in missing times
+#     merged_data = pd.merge(all_combinations_df, data, on=['pickup_time', 'pickup_location_id'], how='left')
+    
+#     # Fill NaN values with zero
+#     merged_data = merged_data.fillna(0)
+    
+#     return merged_data
+
 def add_missing_times(data: pd.DataFrame, freq: str) -> pd.DataFrame:
     """
     Adds missing times to the data based on the specified frequency.
@@ -185,12 +222,15 @@ def add_missing_times(data: pd.DataFrame, freq: str) -> pd.DataFrame:
     # Determine the start and end times
     min_time = data['pickup_time'].min()
     max_time = data['pickup_time'].max()
-    
-    # Determine the start time as the first day of the month at 00:00:00
-    start_time = pd.Timestamp(min_time.year, min_time.month, 1).replace(hour=0, minute=0, second=0, microsecond=0)
-    
+
+    # Determine the start time 
+    start_time = min_time.floor(freq)
+
+    # Determine the end time 
+    end_time = max_time.ceil(freq)
+
     # Determine the end time as the first day of the following month at 00:00:00
-    end_time = (pd.Timestamp(max_time.year, max_time.month, 1) + pd.DateOffset(months=1)).replace(hour=0, minute=0, second=0, microsecond=0)
+    #end_time = (pd.Timestamp(max_time.year, max_time.month, 1) + pd.DateOffset(months=1)).replace(hour=0, minute=0, second=0, microsecond=0)
     
     all_intervals = pd.date_range(start=start_time, end=end_time, freq=freq, inclusive='left')
     
@@ -223,19 +263,19 @@ def transform_save_data_into_ts_data(data: pd.DataFrame, freq: str = 'h') -> pd.
     # Add missing times
     transformed_data = add_missing_times(data_grouped, freq)
     
-    # Extract year and month from the data
-    year = data['pickup_time'].dt.year.iloc[0]
-    unique_months = data['pickup_time'].dt.month.nunique()
+    # # Extract year and month from the data
+    # year = data['pickup_time'].dt.year.iloc[0]
+    # unique_months = data['pickup_time'].dt.month.nunique()
     
-    # Define the transformed file name
-    if unique_months == 1:
-        month = data['pickup_time'].dt.month.iloc[0]
-        transformed_file_name = f"ts_data_{year}-{month:02d}.parquet"
-    else:
-        transformed_file_name = f"ts_data_{year}.parquet"
+    # # Define the transformed file name
+    # if unique_months == 1:
+    #     month = data['pickup_time'].dt.month.iloc[0]
+    #     transformed_file_name = f"ts_data_{year}-{month:02d}.parquet"
+    # else:
+    #     transformed_file_name = f"ts_data_{year}.parquet"
     
     # Save the transformed data
-    save_data(transformed_data, Path(SILVER_DATA_DIR) / str(year), transformed_file_name)
+    #save_data(transformed_data, Path(SILVER_DATA_DIR) / str(year), transformed_file_name)
     
     return transformed_data
 

@@ -79,32 +79,37 @@ def _read_and_concat_parquet_files(file_paths: List[str]) -> pd.DataFrame:
     
     return concatenated_df
 
-def validate_and_save_data(file_path: str, start_timestamp: str, end_timestamp: str) -> pd.DataFrame:
+def validate_data(file_path: str, start_date: str, end_date: str) -> pd.DataFrame:
     """
-    Validates and saves the data within a specified date range.
+    Validates and saves the data for a specific year and month.
 
     :param file_path: The path of the file to be processed.
-    :param start_timestamp: The start timestamp in 'YYYY-MM-DD' format.
-    :param end_timestamp: The end timestamp in 'YYYY-MM-DD' format.
-    :param save_dir: The directory where the validated data will be saved.
+    :param start_date: The start date for filtering the data (inclusive).
+    :param end_date: The end date for filtering the data (inclusive).
     :return: The validated DataFrame.
     """
     # Load the raw data
     rides = pd.read_parquet(file_path)
     
-    # Validate the data
+    # Convert the tpep_pickup_datetime column to datetime format
+    rides['tpep_pickup_datetime'] = pd.to_datetime(rides['tpep_pickup_datetime'])
+    
+    # Define the start and end dates
+    start_date = pd.to_datetime(start_date)
+    end_date = pd.to_datetime(end_date)
+    
+    # Filter the DataFrame to include only rows within the specified date range
+    rides = rides[
+        (rides['tpep_pickup_datetime'] >= start_date) &
+        (rides['tpep_pickup_datetime'] <= end_date)
+    ]
+    
+    # Select and rename columns, and optionally assign new columns
     rides = (
         rides[['tpep_pickup_datetime', 'PULocationID']]
         .rename(columns={'tpep_pickup_datetime': 'pickup_datetime', 'PULocationID': 'pickup_location_id'})
-        .assign(pickup_time=lambda x: x['pickup_datetime'])
+        .assign(pickup_time=lambda x: x['pickup_datetime'])  # Uncomment if needed
     )
-    
-    # Convert timestamps to pd.Timestamp
-    start_time = pd.to_datetime(start_timestamp)
-    end_time = pd.to_datetime(end_timestamp)
-    
-    # Filter data for the specific date range
-    rides = rides.loc[lambda x: (x['pickup_datetime'] >= start_time) & (x['pickup_datetime'] < end_time)]
     
     # Remove duplicates
     rides = rides.drop_duplicates()
