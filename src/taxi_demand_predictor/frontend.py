@@ -141,7 +141,7 @@ with st.spinner('Computing model predictions...'):
     
 
 with st.spinner(text="Preparing data to plot..."):
-    df = prepare_data(nyc_map, result).sample(frac=0.50)
+    df = prepare_data(nyc_map, result).sample(frac=0.40)
     st.sidebar.write('Plotting data prepared')
     progress_bar.progress(5/N_STEPS)
 
