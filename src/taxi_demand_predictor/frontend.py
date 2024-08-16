@@ -10,8 +10,6 @@ from taxi_demand_predictor.paths import DATA_DIR
 from taxi_demand_predictor.plots import plot_ts, plot_train_and_target
 from taxi_demand_predictor.inference import get_model_predictions, load_batch_of_features_from_store, load_model_from_registry, load_predictions_from_store, get_or_create_feature_view
 from taxi_demand_predictor.config import CURRENT_DATE, N_STEPS, DESTINATIONS_TIMES
-import asyncio
-import tornado.websocket
 
 # Set page configuration
 st.set_page_config(layout="wide")
@@ -104,19 +102,6 @@ def generate_nyc_map(df):
 
     return r
 
-async def websocket_handler():
-    try:
-        # Your WebSocket connection and communication logic here
-        pass
-    except tornado.websocket.WebSocketClosedError:
-        print("WebSocket connection closed. Attempting to reconnect...")
-        # Implement reconnection logic here
-    except Exception as e:
-        print(f"An unexpected error occurred: {e}")
-
-# Run the WebSocket handler
-asyncio.run(websocket_handler())
-
 current_date = pd.to_datetime(datetime.now()).strftime('%Y-%m-%d %H:%M:%S')
 st.title(f'NYC Taxi Demand Predictor')
 st.markdown('<h2 style="font-size:24px;">Predicted Demand For The Next Hour</h2>', unsafe_allow_html=True)
@@ -171,7 +156,7 @@ except Exception as e:
 
 try:
     with st.spinner(text="Preparing data to plot..."):
-        df = prepare_data(nyc_map, result).sample(frac=0.40)
+        df = prepare_data(nyc_map, result).sample(frac=0.10)
         st.sidebar.write('Plotting data prepared')
         progress_bar.progress(5/N_STEPS)
 except Exception as e:
