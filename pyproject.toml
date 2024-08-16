@@ -28,6 +28,7 @@ streamlit = "^1.37.1"
 geopandas = "^1.0.1"
 pydeck = "^0.9.1"
 watchdog = "^4.0.2"
+debugpy = "^1.8.5"
 
 
 [build-system]
