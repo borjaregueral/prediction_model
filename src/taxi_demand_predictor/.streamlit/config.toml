@@ -3,4 +3,4 @@ base = "dark"
 primaryColor = "#1E90FF"  # DodgerBlue color
 
 [server]
-maxMessageSize = 1000
+maxMessageSize = 500
